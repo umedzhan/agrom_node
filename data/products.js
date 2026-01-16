@@ -1,0 +1,48 @@
+const products = [
+    {
+        name: 'Organic Cabbage',
+        image: '/images/products/cabbage.jpg',
+        description: 'Fresh organic cabbage from local farm',
+        brand: 'Nature Farm',
+        category: 'Vegetables',
+        price: 4.99,
+        countInStock: 10,
+        rating: 4.5,
+        numReviews: 12,
+    },
+    {
+        name: 'Fresh Tomato',
+        image: '/images/products/tomato.jpg',
+        description: 'Juicy red tomatoes',
+        brand: 'Organic Life',
+        category: 'Vegetables',
+        price: 2.99,
+        countInStock: 7,
+        rating: 4.0,
+        numReviews: 8,
+    },
+    {
+        name: 'Green Apple',
+        image: '/images/products/apple.jpg',
+        description: 'Crisp and sweet green apples',
+        brand: 'Orchard Best',
+        category: 'Fruits',
+        price: 3.99,
+        countInStock: 5,
+        rating: 5.0,
+        numReviews: 4,
+    },
+    {
+        name: 'Organic Milk',
+        image: '/images/products/milk.jpg',
+        description: 'Grass-fed cow milk',
+        brand: 'Dairy Pure',
+        category: 'Dairy',
+        price: 5.99,
+        countInStock: 0,
+        rating: 4.5,
+        numReviews: 2,
+    },
+];
+
+module.exports = products;
