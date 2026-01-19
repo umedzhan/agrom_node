@@ -42,16 +42,23 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
+    const { name, price, image, brand, category, countInStock, description } = req.body;
+
+    if (!name || !price || !image || !brand || !category || !description) {
+        res.status(400);
+        throw new Error('Please add all required fields');
+    }
+
     const product = new Product({
-        name: 'Sample name',
-        price: 0,
+        name,
+        price,
         user: req.user._id,
-        image: '/images/sample.jpg',
-        brand: 'Sample brand',
-        category: 'Sample category',
-        countInStock: 0,
+        image,
+        brand,
+        category,
+        countInStock,
         numReviews: 0,
-        description: 'Sample description'
+        description
     });
 
     const createdProduct = await product.save();

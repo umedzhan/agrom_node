@@ -20,8 +20,13 @@ app.use('/api/auth', require('./routes/userRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
+app.use(notFound);
+app.use(errorHandler);
 
 
 app.get('/', (req, res) => {
