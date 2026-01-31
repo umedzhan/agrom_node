@@ -3,13 +3,24 @@ const router = express.Router();
 const {
     authUser,
     registerUser,
-    getUserProfile
+    getUserProfile,
+    updateUserProfile,
+    getUsers,
+    deleteUser,
+    getUserById,
+    updateUser
 } = require('../controllers/userController');
 
-const { protect } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
+const { validate, registerValidation, loginValidation } = require('../middleware/validator');
 
-router.post('/login', authUser);
-router.route('/').post(registerUser);
-router.route('/profile').get(protect, getUserProfile);
+router.post('/login', validate(loginValidation), authUser);
+router.route('/').post(validate(registerValidation), registerUser).get(protect, admin, getUsers);
+router.route('/profile').get(protect, getUserProfile).put(protect, updateUserProfile);
+router
+    .route('/:id')
+    .delete(protect, admin, deleteUser)
+    .get(protect, admin, getUserById)
+    .put(protect, admin, updateUser);
 
 module.exports = router;
