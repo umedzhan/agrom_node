@@ -1,111 +1,111 @@
 # Agrom E-commerce Backend
 
-Backend API for the Agrom E-commerce platform, built with Node.js, Express, and MongoDB.
+Agrom E-commerce platformasi uchun Backend API. Node.js, Express va MongoDB yordamida qurilgan.
 
-## Table of Contents
+## Mundarija
 
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [API Endpoints](#api-endpoints)
+- [Umumiy Ma'lumot](#umumiy-malumot)
+- [Texnologiyalar](#texnologiyalar)
+- [Boshlash](#boshlash)
+- [API Endpointlari](#api-endpointlari)
 
-## Overview
+## Umumiy Ma'lumot
 
-This is the RESTful API server for the Agrom E-commerce application. It handles user authentication, product management, order processing, and image uploads.
+Bu Agrom E-commerce ilovasi uchun RESTful API serveri. U foydalanuvchi autentifikatsiyasi, mahsulotlarni boshqarish, buyurtmalarni qayta ishlash va rasmlarni yuklash vazifalarini bajaradi.
 
-## Tech Stack
+## Texnologiyalar
 
 - **Runtime**: [Node.js](https://nodejs.org/)
 - **Framework**: [Express.js](https://expressjs.com/)
-- **Database**: [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/)
-- **Authentication**: JWT (JSON Web Tokens)
-- **Image Handling**: Multer
+- **Ma'lumotlar bazasi**: [MongoDB](https://www.mongodb.com/) va [Mongoose](https://mongoosejs.com/)
+- **Autentifikatsiya**: JWT (JSON Web Tokens)
+- **Rasmlar bilan ishlash**: Multer
 
-## Getting Started
+## Boshlash
 
-### Prerequisites
+### Talablar
 
-- Node.js (v14 or higher)
-- NPM or Yarn
-- MongoDB instance (local or Atlas)
+- Node.js (v14 yoki undan yuqori)
+- NPM yoki Yarn
+- MongoDB (lokal yoki Atlas)
 
-### Installation
+### O'rnatish
 
-1.  Clone the repository:
+1.  Repozitoriyni klonlash:
     ```bash
     git clone <repository-url>
     cd backend
     ```
 
-2.  Install dependencies:
+2.  Kutubxonalarni o'rnatish:
     ```bash
     npm install
     ```
 
-3.  Set up environment variables:
-    Create a `.env` file in the root directory and add the following:
+3.  Atrof-muhit o'zgaruvchilarini sozlash:
+    Ildiz papkasida `.env` faylini yarating va quyidagilarni qo'shing:
     ```env
     NODE_ENV=development
     PORT=5000
-    MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret
+    MONGO_URI=sizning_mongodb_ulanish_manzilingiz
+    JWT_SECRET=sizning_jwt_maxfiy_kalitingiz
     ```
 
-### Running the Server
+### Serverni ishga tushirish
 
-- **Development Mode** (with nodemon):
+- **Development rejimi** (nodemon bilan):
     ```bash
     npm run dev
     ```
 
-- **Production Mode**:
+- **Production rejimi**:
     ```bash
     npm start
     ```
 
-- **Seed Data**:
-    To import sample data:
+- **Ma'lumotlarni kiritish (Seeder)**:
+    Namunaviy ma'lumotlarni yuklash uchun:
     ```bash
     npm run data:import
     ```
-    To destroy data:
+    Ma'lumotlarni o'chirish uchun:
     ```bash
     npm run data:destroy
     ```
 
-## API Endpoints
+## API Endpointlari
 
-### Authentication
+### Autentifikatsiya
 
-| Method | Endpoint | Description | Access |
+| Metod | Endpoint | Tavsif | Kirish |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/login` | Authenticate user & get token | Public |
-| `POST` | `/api/auth` | Register a new user | Public |
-| `GET` | `/api/auth/profile` | Get user profile | Private |
+| `POST` | `/api/auth/login` | Tizimga kirish va token olish | Ochiq |
+| `POST` | `/api/auth` | Ro'yxatdan o'tish | Ochiq |
+| `GET` | `/api/auth/profile` | Profil ma'lumotlarini olish | Yopiq |
 
-### Products
+### Mahsulotlar
 
-| Method | Endpoint | Description | Access |
+| Metod | Endpoint | Tavsif | Kirish |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/products` | Fetch all products | Public |
-| `GET` | `/api/products/:id` | Fetch single product | Public |
-| `POST` | `/api/products` | Create a product | Private/Admin |
-| `PUT` | `/api/products/:id` | Update a product | Private/Admin |
-| `DELETE` | `/api/products/:id` | Delete a product | Private/Admin |
+| `GET` | `/api/products` | Barcha mahsulotlarni olish | Ochiq |
+| `GET` | `/api/products/:id` | Bitta mahsulotni olish | Ochiq |
+| `POST` | `/api/products` | Mahsulot yaratish | Yopiq/Admin |
+| `PUT` | `/api/products/:id` | Mahsulotni yangilash | Yopiq/Admin |
+| `DELETE` | `/api/products/:id` | Mahsulotni o'chirish | Yopiq/Admin |
 
-### Orders
+### Buyurtmalar
 
-| Method | Endpoint | Description | Access |
+| Metod | Endpoint | Tavsif | Kirish |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/orders` | Create new order | Private |
-| `GET` | `/api/orders/:id` | Get order by ID | Private |
+| `POST` | `/api/orders` | Yangi buyurtma yaratish | Yopiq |
+| `GET` | `/api/orders/:id` | ID bo'yicha buyurtmani olish | Yopiq |
 
-### Uploads
+### Yuklamalar
 
-| Method | Endpoint | Description | Access |
+| Metod | Endpoint | Tavsif | Kirish |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/upload` | Upload an image | Public |
+| `POST` | `/api/upload` | Rasm yuklash | Ochiq |
 
-## License
+## Litsenziya
 
-This project is open source.
+Ushbu loyiha ochiq manbali.
