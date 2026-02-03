@@ -108,4 +108,4 @@ Bu Agrom E-commerce ilovasi uchun RESTful API serveri. U foydalanuvchi autentifi
 
 ## Litsenziya
 
-Ushbu loyiha ochiq manbali.
+Barcha huquqlar himoyalangan. Agrom E-commerce platformasi uchun Backend API.
