@@ -54,6 +54,26 @@ router.post('/', (req, res) => {
         res.send(`/${filePath}`);
     });
 });
+router.post('/php', upload.single('image'), (req, res) => {
+
+    if (!req.file) {
+
+        return res.json({
+            success: false,
+            message: "No file uploaded"
+        });
+
+    }
+
+    const filePath = req.file.path.replace(/\\/g, "/");
+
+    res.json({
+        success: true,
+        path: `/${filePath}`
+    });
+
+});
 
 module.exports = router;
+
 
