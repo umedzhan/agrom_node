@@ -39,8 +39,21 @@ const upload = multer({
     },
 });
 
-router.post('/', upload.single('image'), (req, res) => {
-    res.send(`/${req.file.path}`);
+router.post('/', (req, res) => {
+    upload.single('image')(req, res, function (err) {
+        if (err) {
+            // Agar rasm formati xato bo'lsa (masalan: Images only!)
+            return res.send(`Error: ${err}`);
+        }
+        if (!req.file) {
+            // Fayl yetib kelmagan bo'lsa
+            return res.send("Error: No file uploaded");
+        }
+        // Hammasi joyida bo'lsa, yo'lni slashlar bilan to'g'irlab qaytaramiz
+        const filePath = req.file.path.replace(/\\/g, "/");
+        res.send(`/${filePath}`);
+    });
 });
 
 module.exports = router;
+
