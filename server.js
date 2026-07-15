@@ -16,7 +16,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(require('helmet')());
+// The frontend is always served from a different origin/port than this API
+// (see VITE_API_URL), so uploaded images and API responses must be loadable
+// cross-origin. CORS above already allows any origin; CORP needs to match.
+app.use(require('helmet')({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(require('express-mongo-sanitize')());
 
 // Connect to Database

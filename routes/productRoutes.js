@@ -8,10 +8,13 @@ const {
     updateProduct
 } = require('../controllers/productController');
 
-const { protect, admin, adminOrFarmer } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 const { validate, productValidation } = require('../middleware/validator');
 
-router.route('/').get(getProducts).post(protect, adminOrFarmer, validate(productValidation), createProduct);
-router.route('/:id').get(getProductById).delete(protect, adminOrFarmer, deleteProduct).put(protect, adminOrFarmer, validate(productValidation), updateProduct);
+// Any authenticated user can create/edit/delete products; ownership of
+// individual products (not just admin/farmer role) is enforced in the
+// controller so users can only modify their own listings.
+router.route('/').get(getProducts).post(protect, validate(productValidation), createProduct);
+router.route('/:id').get(getProductById).delete(protect, deleteProduct).put(protect, validate(productValidation), updateProduct);
 
 module.exports = router;

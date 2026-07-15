@@ -3,7 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { protect, adminOrFarmer } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 const storage = multer.diskStorage({
     destination(req, file, cb) {
@@ -44,7 +44,8 @@ const upload = multer({
     },
 });
 
-router.post('/', protect, adminOrFarmer, (req, res) => {
+// Any authenticated user can upload an image for their own product listing.
+router.post('/', protect, (req, res) => {
     upload.single('image')(req, res, function (err) {
         if (err) {
             return res.status(400).json({ success: false, error: String(err) });

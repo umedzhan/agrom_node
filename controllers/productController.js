@@ -80,7 +80,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
 
     if (product) {
-        if (req.user.isAdmin || (req.user.isFarmer && product.user.equals(req.user._id))) {
+        if (req.user.isAdmin || product.user.equals(req.user._id)) {
             await Product.deleteOne({ _id: product._id });
             res.json({ message: 'Product removed' });
         } else {
@@ -137,7 +137,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
 
     if (product) {
-        if (req.user.isAdmin || (req.user.isFarmer && product.user.equals(req.user._id))) {
+        if (req.user.isAdmin || product.user.equals(req.user._id)) {
             product.name = name;
             product.price = price;
             product.description = description;
