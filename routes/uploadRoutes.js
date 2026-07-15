@@ -57,5 +57,30 @@ router.post('/', protect, adminOrFarmer, (req, res) => {
     });
 });
 
+router.post('/php', (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({
+        success: false,
+        error: String(err),
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const filePath = req.file.path.replace(/\\/g, "/");
+    return res.json({
+      success: true,
+      path: `/${filePath}`,
+    });
+  });
+});
+
 module.exports = router;
 
