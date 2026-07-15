@@ -6,37 +6,43 @@ const connectDB = require('./config/db');
 dotenv.config();
 connectDB();
 
+// Maintenance script: ensures an admin account exists / is promoted.
+// Requires ADMIN_EMAIL and ADMIN_PASSWORD to be set explicitly so nobody can
+// accidentally reset a real admin's password to a hardcoded, guessable value
+// by running this against a production MONGO_URI.
+const adminEmail = process.env.ADMIN_EMAIL;
+const adminPassword = process.env.ADMIN_PASSWORD;
+
 const verifyAdmin = async () => {
+    if (!adminEmail || !adminPassword) {
+        console.error('Set ADMIN_EMAIL and ADMIN_PASSWORD env vars before running this script.');
+        process.exit(1);
+    }
+    if (adminPassword.length < 6) {
+        console.error('ADMIN_PASSWORD must be at least 6 characters.');
+        process.exit(1);
+    }
+
     try {
-        const adminEmail = 'admin@example.com';
         const user = await User.findOne({ email: adminEmail });
 
         if (user) {
             console.log(`Admin user found: ${user.name}`);
-            // Check if isAdmin is true
-            if (user.isAdmin) {
-                console.log('User is Admin');
-            } else {
-                console.log('User exists but isAdmin is false. Fixing...');
+            if (!user.isAdmin) {
                 user.isAdmin = true;
-                await user.save();
-                console.log('User promoted to Admin.');
+                console.log('Promoting user to Admin...');
             }
-
-            // Optional: You could reset password here if you wanted to be 100% sure
-            user.password = '123456';
+            user.password = adminPassword;
             await user.save();
-            console.log('Admin password reset to 123456 to ensure access.');
-
+            console.log('Admin password updated.');
         } else {
-            console.log('Admin user NOT found. Creating...');
             const newAdmin = await User.create({
                 name: 'Admin User',
                 email: adminEmail,
-                password: '123456',
+                password: adminPassword,
                 isAdmin: true,
             });
-            console.log(`Admin user created: ${newAdmin.email} / 123456`);
+            console.log(`Admin user created: ${newAdmin.email}`);
         }
 
         process.exit();

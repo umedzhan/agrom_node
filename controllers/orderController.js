@@ -1,39 +1,64 @@
 const asyncHandler = require('express-async-handler');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
 const addOrderItems = asyncHandler(async (req, res) => {
-    const {
-        orderItems,
+    const { orderItems, shippingAddress, paymentMethod } = req.body;
+
+    if (!orderItems || orderItems.length === 0) {
+        res.status(400);
+        throw new Error('No order items');
+    }
+
+    // Prices are recalculated from the database instead of trusted from the
+    // client, otherwise a user could submit arbitrary prices for an order.
+    const products = await Product.find({
+        _id: { $in: orderItems.map((item) => item.product) },
+    });
+
+    const dbOrderItems = orderItems.map((item) => {
+        const matchingProduct = products.find(
+            (p) => p._id.toString() === item.product?.toString()
+        );
+
+        if (!matchingProduct) {
+            res.status(400);
+            throw new Error(`Product not found: ${item.product}`);
+        }
+
+        return {
+            name: matchingProduct.name,
+            qty: item.qty,
+            image: matchingProduct.image,
+            price: matchingProduct.price,
+            product: matchingProduct._id,
+        };
+    });
+
+    const itemsPrice = dbOrderItems.reduce(
+        (acc, item) => acc + item.price * item.qty,
+        0
+    );
+    const shippingPrice = itemsPrice > 100 ? 0 : 10;
+    const taxPrice = Number((0.15 * itemsPrice).toFixed(2));
+    const totalPrice = Number((itemsPrice + shippingPrice + taxPrice).toFixed(2));
+
+    const order = new Order({
+        orderItems: dbOrderItems,
+        user: req.user._id,
         shippingAddress,
         paymentMethod,
         itemsPrice,
         taxPrice,
         shippingPrice,
-        totalPrice
-    } = req.body;
+        totalPrice,
+    });
 
-    if (orderItems && orderItems.length === 0) {
-        res.status(400);
-        throw new Error('No order items');
-        return;
-    } else {
-        const order = new Order({
-            orderItems,
-            user: req.user._id,
-            shippingAddress,
-            paymentMethod,
-            itemsPrice,
-            taxPrice,
-            shippingPrice,
-            totalPrice
-        });
-
-        const createdOrder = await order.save();
-        res.status(201).json(createdOrder);
-    }
+    const createdOrder = await order.save();
+    res.status(201).json(createdOrder);
 });
 
 // @desc    Get order by ID
@@ -46,6 +71,10 @@ const getOrderById = asyncHandler(async (req, res) => {
     );
 
     if (order) {
+        if (!order.user._id.equals(req.user._id) && !req.user.isAdmin) {
+            res.status(401);
+            throw new Error('Not authorized to view this order');
+        }
         res.json(order);
     } else {
         res.status(404);
@@ -60,6 +89,11 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (order) {
+        if (!order.user.equals(req.user._id) && !req.user.isAdmin) {
+            res.status(401);
+            throw new Error('Not authorized to update this order');
+        }
+
         order.isPaid = true;
         order.paidAt = Date.now();
         // Payment result from PayPal/Stripe would go here
@@ -67,7 +101,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
             id: req.body.id,
             status: req.body.status,
             update_time: req.body.update_time,
-            email_address: req.body.payer.email_address,
+            email_address: req.body.payer?.email_address,
         };
 
         const updatedOrder = await order.save();
