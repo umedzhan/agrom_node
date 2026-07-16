@@ -1,9 +1,14 @@
+const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-dotenv.config();
+// Load .env from this file's own directory, not the process's current
+// working directory — process managers (pm2, systemd, ...) can launch
+// the script from an unrelated cwd, silently causing env vars to load
+// from the wrong place (or not at all).
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 if (!process.env.JWT_SECRET) {
     console.error('FATAL ERROR: JWT_SECRET is not defined in the environment.');
@@ -35,7 +40,6 @@ app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 app.get('/', (req, res) => {

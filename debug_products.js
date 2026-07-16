@@ -1,9 +1,10 @@
+const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const Product = require('./models/Product');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
 const checkProducts = async () => {

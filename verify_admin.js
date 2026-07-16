@@ -1,9 +1,10 @@
+const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const User = require('./models/User');
 const connectDB = require('./config/db');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
 // Maintenance script: ensures an admin account exists / is promoted.
