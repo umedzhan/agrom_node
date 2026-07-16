@@ -17,7 +17,13 @@ const importData = async () => {
         await Product.deleteMany();
         await User.deleteMany();
 
-        const createdUsers = await User.insertMany(users);
+        // insertMany bypasses the User schema's pre('save') hook, so
+        // passwords would be stored in plain text and nobody could log in.
+        // Create documents one at a time so they go through .save().
+        const createdUsers = [];
+        for (const user of users) {
+            createdUsers.push(await User.create(user));
+        }
 
         const adminUser = createdUsers[0]._id;
 
