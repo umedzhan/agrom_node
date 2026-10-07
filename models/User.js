@@ -29,7 +29,29 @@ const userSchema = mongoose.Schema({
     wishlist: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }]
+    }],
+    // Defaults to true so accounts created before verification existed stay active.
+    emailVerified: {
+        type: Boolean,
+        default: true
+    },
+    verificationCodeHash: {
+        type: String,
+        select: false
+    },
+    verificationCodeExpires: {
+        type: Date,
+        select: false
+    },
+    verificationAttempts: {
+        type: Number,
+        default: 0,
+        select: false
+    },
+    verificationSentAt: {
+        type: Date,
+        select: false
+    }
 }, {
     timestamps: true
 });

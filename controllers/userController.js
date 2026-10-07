@@ -1,6 +1,30 @@
+const crypto = require('crypto');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const sendEmail = require('../utils/sendEmail');
+
+const CODE_TTL_MS = 10 * 60 * 1000;
+const RESEND_COOLDOWN_MS = 60 * 1000;
+const MAX_CODE_ATTEMPTS = 5;
+
+const hashCode = (code) => crypto.createHash('sha256').update(code).digest('hex');
+
+const issueVerificationCode = async (user) => {
+    const code = crypto.randomInt(100000, 1000000).toString();
+
+    user.verificationCodeHash = hashCode(code);
+    user.verificationCodeExpires = new Date(Date.now() + CODE_TTL_MS);
+    user.verificationAttempts = 0;
+    user.verificationSentAt = new Date();
+    await user.save();
+
+    await sendEmail({
+        to: user.email,
+        subject: 'AgroM — email tasdiqlash kodi',
+        text: `Sizning tasdiqlash kodingiz: ${code}\nKod 10 daqiqa davomida amal qiladi.`,
+    });
+};
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
@@ -11,6 +35,14 @@ const authUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
+        if (!user.emailVerified) {
+            return res.status(403).json({
+                message: 'Email is not verified. Please enter the code sent to your email.',
+                requiresVerification: true,
+                email: user.email,
+            });
+        }
+
         res.json({
             _id: user._id,
             name: user.name,
@@ -58,21 +90,89 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         name,
         email,
-        password
+        password,
+        emailVerified: false,
     });
 
     if (user) {
+        await issueVerificationCode(user);
         res.status(201).json({
-            _id: user._id,
-            name: user.name,
+            requiresVerification: true,
             email: user.email,
-            isAdmin: user.isAdmin,
-            token: generateToken(user._id),
         });
     } else {
         res.status(400);
         throw new Error('Invalid user data');
     }
+});
+
+// @desc    Verify email with the code sent at registration
+// @route   POST /api/auth/verify-email
+// @access  Public
+const verifyEmail = asyncHandler(async (req, res) => {
+    const { email, code } = req.body;
+
+    const user = await User.findOne({ email }).select(
+        '+verificationCodeHash +verificationCodeExpires +verificationAttempts'
+    );
+
+    const invalid = () => {
+        res.status(400);
+        throw new Error('Invalid or expired verification code');
+    };
+
+    if (
+        !user ||
+        user.emailVerified ||
+        !user.verificationCodeHash ||
+        user.verificationCodeExpires < Date.now() ||
+        user.verificationAttempts >= MAX_CODE_ATTEMPTS
+    ) {
+        invalid();
+    }
+
+    user.verificationAttempts += 1;
+
+    if (hashCode(code) !== user.verificationCodeHash) {
+        await user.save();
+        invalid();
+    }
+
+    user.emailVerified = true;
+    user.verificationCodeHash = undefined;
+    user.verificationCodeExpires = undefined;
+    user.verificationAttempts = 0;
+    user.verificationSentAt = undefined;
+    await user.save();
+
+    res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isFarmer: user.isFarmer,
+        token: generateToken(user._id),
+    });
+});
+
+// @desc    Resend the email verification code
+// @route   POST /api/auth/resend-verification
+// @access  Public
+const resendVerification = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email }).select('+verificationSentAt');
+
+    if (user && !user.emailVerified) {
+        const sentAt = user.verificationSentAt ? user.verificationSentAt.getTime() : 0;
+        if (Date.now() - sentAt < RESEND_COOLDOWN_MS) {
+            res.status(429);
+            throw new Error('Please wait a minute before requesting a new code');
+        }
+        await issueVerificationCode(user);
+    }
+
+    res.json({ message: 'If the account exists and is unverified, a new code has been sent' });
 });
 
 // @desc    Get user profile
@@ -191,4 +291,15 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { authUser, registerUser, getUserProfile, updateUserProfile, getUsers, deleteUser, getUserById, updateUser };
+module.exports = {
+    authUser,
+    registerUser,
+    verifyEmail,
+    resendVerification,
+    getUserProfile,
+    updateUserProfile,
+    getUsers,
+    deleteUser,
+    getUserById,
+    updateUser,
+};

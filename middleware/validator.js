@@ -27,6 +27,15 @@ const loginValidation = [
     check('password', 'Password is required').exists(),
 ];
 
+const verifyEmailValidation = [
+    check('email', 'Please include a valid email').isEmail(),
+    check('code', 'Verification code must be 6 digits').isLength({ min: 6, max: 6 }).isNumeric(),
+];
+
+const resendVerificationValidation = [
+    check('email', 'Please include a valid email').isEmail(),
+];
+
 const productValidation = [
     check('name', 'Name is required').not().isEmpty(),
     check('price', 'Price is required and must be a number').isNumeric(),
@@ -40,5 +49,7 @@ module.exports = {
     validate,
     registerValidation,
     loginValidation,
+    verifyEmailValidation,
+    resendVerificationValidation,
     productValidation,
 };
