@@ -37,6 +37,7 @@ app.use('/api/auth', require('./routes/userRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
+app.use('/api', require('./routes/exportRoutes'));
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 

@@ -97,7 +97,10 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin/Farmer
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, price, image, brand, category, countInStock, description } = req.body;
+    const {
+        name, price, image, brand, category, countInStock, description,
+        region, grade, certificates, harvestDate, buyerTypes, delivery,
+    } = req.body;
 
     if (!name || !price || !image || !brand || !category || !description) {
         res.status(400);
@@ -113,7 +116,13 @@ const createProduct = asyncHandler(async (req, res) => {
         category,
         countInStock,
         numReviews: 0,
-        description
+        description,
+        region,
+        grade,
+        certificates,
+        harvestDate,
+        buyerTypes,
+        delivery,
     });
 
     const createdProduct = await product.save();
@@ -132,6 +141,12 @@ const updateProduct = asyncHandler(async (req, res) => {
         brand,
         category,
         countInStock,
+        region,
+        grade,
+        certificates,
+        harvestDate,
+        buyerTypes,
+        delivery,
     } = req.body;
 
     const product = await Product.findById(req.params.id);
@@ -145,6 +160,12 @@ const updateProduct = asyncHandler(async (req, res) => {
             product.brand = brand;
             product.category = category;
             product.countInStock = countInStock;
+            product.region = region;
+            product.grade = grade;
+            product.certificates = certificates;
+            product.harvestDate = harvestDate;
+            product.buyerTypes = buyerTypes;
+            product.delivery = delivery;
 
             const updatedProduct = await product.save();
             res.json(updatedProduct);

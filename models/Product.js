@@ -46,6 +46,29 @@ const productSchema = mongoose.Schema({
         required: true,
         default: 0
     },
+    // Optional "Market" fields (local/export trade listing). Left unset on
+    // older products, so nothing here can be required.
+    region: {
+        type: String
+    },
+    grade: {
+        type: String,
+        enum: ['premium', 'grade1', 'grade2']
+    },
+    certificates: [{
+        type: String
+    }],
+    harvestDate: {
+        type: Date
+    },
+    buyerTypes: [{
+        type: String,
+        enum: ['wholesale', 'retail', 'processing', 'horeca', 'distributor', 'exporter']
+    }],
+    delivery: [{
+        type: String,
+        enum: ['pickup', 'seller', 'partner']
+    }],
 }, {
     timestamps: true
 });
