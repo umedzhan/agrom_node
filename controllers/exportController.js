@@ -5,6 +5,7 @@ const ExportLead = require('../models/ExportLead');
 const regions = require('../data/regions');
 const countries = require('../data/countries');
 const logisticsEstimates = require('../data/logisticsEstimates');
+const notify = require('../utils/notify');
 
 // @desc    List Uzbekistan regions (static reference data)
 // @route   GET /api/regions
@@ -102,6 +103,7 @@ const advanceExportOperation = asyncHandler(async (req, res) => {
 
     operation.currentStage += 1;
     const updated = await operation.save();
+    notify(operation.user, 'export', `Eksport jarayoni ${updated.currentStage}-bosqichga o'tdi`, '/export');
     res.json(updated);
 });
 

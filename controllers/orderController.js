@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const notify = require('../utils/notify');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -105,6 +106,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
         };
 
         const updatedOrder = await order.save();
+        notify(order.user, 'order', "Buyurtma to'landi deb belgilandi", `/order/${order._id}`);
         res.json(updatedOrder);
     } else {
         res.status(404);
@@ -129,6 +131,7 @@ const updateOrderToPaidByAdmin = asyncHandler(async (req, res) => {
         };
 
         const updatedOrder = await order.save();
+        notify(order.user, 'order', "Buyurtma to'landi deb belgilandi", `/order/${order._id}`);
         res.json(updatedOrder);
     } else {
         res.status(404);
@@ -147,6 +150,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
         order.deliveredAt = Date.now();
 
         const updatedOrder = await order.save();
+        notify(order.user, 'order', 'Buyurtmangiz yetkazildi', `/order/${order._id}`);
         res.json(updatedOrder);
     } else {
         res.status(404);

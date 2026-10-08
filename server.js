@@ -40,6 +40,8 @@ app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api', require('./routes/exportRoutes'));
 app.use('/api/certificates', require('./routes/certificateRoutes'));
 app.use('/api/contracts', require('./routes/contractRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api', require('./routes/dashboardRoutes'));
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 

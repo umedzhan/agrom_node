@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Contract = require('../models/Contract');
+const notify = require('../utils/notify');
 
 // @desc    List the logged-in user's contracts
 // @route   GET /api/contracts
@@ -56,6 +57,9 @@ const updateContractStatus = asyncHandler(async (req, res) => {
     }
 
     const updated = await contract.save();
+    if (status === 'active') {
+        notify(contract.user, 'contract', `Shartnoma imzolandi: ${contract.partnerName}`, '/contracts');
+    }
     res.json(updated);
 });
 
