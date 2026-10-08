@@ -2,6 +2,9 @@ const asyncHandler = require('express-async-handler');
 const RegulatoryRequirement = require('../models/RegulatoryRequirement');
 const ExportOperation = require('../models/ExportOperation');
 const ExportLead = require('../models/ExportLead');
+const Product = require('../models/Product');
+const Certificate = require('../models/Certificate');
+const Contract = require('../models/Contract');
 const regions = require('../data/regions');
 const countries = require('../data/countries');
 const logisticsEstimates = require('../data/logisticsEstimates');
@@ -107,6 +110,60 @@ const advanceExportOperation = asyncHandler(async (req, res) => {
     res.json(updated);
 });
 
+// @desc    A seller's local-market readiness checklist — not legal
+//          requirements, just a reflection of this user's own real data
+//          (do they have products, certificates, delivery info, ...).
+// @route   GET /api/local-requirements
+// @access  Private
+const getLocalRequirements = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const [myProducts, activeCertCount, contractCount] = await Promise.all([
+        Product.find({ user: userId }),
+        Certificate.countDocuments({ user: userId, status: 'active' }),
+        Contract.countDocuments({ user: userId }),
+    ]);
+
+    const hasProduct = myProducts.length > 0;
+    const hasGrade = myProducts.some((p) => p.grade);
+    const hasDelivery = myProducts.some((p) => p.delivery && p.delivery.length > 0);
+
+    const items = [
+        {
+            group: 'seller',
+            title: 'Email tasdiqlangan hisob',
+            status: 'ready',
+        },
+        {
+            group: 'product',
+            title: 'Kamida bitta mahsulot joylangan',
+            status: hasProduct ? 'ready' : 'required',
+        },
+        {
+            group: 'quality',
+            title: 'Mahsulotda sifat darajasi (grade) ko\'rsatilgan',
+            status: hasGrade ? 'ready' : 'optional',
+        },
+        {
+            group: 'certificates',
+            title: 'Faol sertifikat mavjud',
+            status: activeCertCount > 0 ? 'ready' : 'optional',
+        },
+        {
+            group: 'transport',
+            title: 'Yetkazib berish usuli belgilangan',
+            status: hasDelivery ? 'ready' : 'optional',
+        },
+        {
+            group: 'contract',
+            title: 'Hamkor bilan shartnoma tuzilgan',
+            status: contractCount > 0 ? 'ready' : 'optional',
+        },
+    ];
+
+    res.json(items);
+});
+
 // @desc    Create an export lead (request help finding a buyer / support)
 // @route   POST /api/export-leads
 // @access  Private
@@ -172,6 +229,7 @@ module.exports = {
     getCountries,
     getCountryByCode,
     getExportRequirements,
+    getLocalRequirements,
     getMyExportOperations,
     startExportOperation,
     advanceExportOperation,

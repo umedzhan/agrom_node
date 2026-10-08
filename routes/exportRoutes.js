@@ -5,6 +5,7 @@ const {
     getCountries,
     getCountryByCode,
     getExportRequirements,
+    getLocalRequirements,
     getMyExportOperations,
     startExportOperation,
     advanceExportOperation,
@@ -19,6 +20,7 @@ router.get('/regions', getRegions);
 router.get('/countries', getCountries);
 router.get('/countries/:code', getCountryByCode);
 router.get('/export-requirements', getExportRequirements);
+router.get('/local-requirements', protect, getLocalRequirements);
 router.route('/export-operations').get(protect, getMyExportOperations).post(protect, startExportOperation);
 router.put('/export-operations/:id/advance', protect, advanceExportOperation);
 router.get('/logistics/estimate', getLogisticsEstimate);
