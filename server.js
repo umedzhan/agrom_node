@@ -38,6 +38,8 @@ app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api', require('./routes/exportRoutes'));
+app.use('/api/certificates', require('./routes/certificateRoutes'));
+app.use('/api/contracts', require('./routes/contractRoutes'));
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 

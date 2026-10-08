@@ -8,8 +8,12 @@ const {
     getMyExportOperations,
     startExportOperation,
     advanceExportOperation,
+    createExportLead,
+    getMyExportLeads,
+    getExportLeads,
+    getLogisticsEstimate,
 } = require('../controllers/exportController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/regions', getRegions);
 router.get('/countries', getCountries);
@@ -17,5 +21,8 @@ router.get('/countries/:code', getCountryByCode);
 router.get('/export-requirements', getExportRequirements);
 router.route('/export-operations').get(protect, getMyExportOperations).post(protect, startExportOperation);
 router.put('/export-operations/:id/advance', protect, advanceExportOperation);
+router.get('/logistics/estimate', getLogisticsEstimate);
+router.get('/export-leads/mine', protect, getMyExportLeads);
+router.route('/export-leads').get(protect, admin, getExportLeads).post(protect, createExportLead);
 
 module.exports = router;

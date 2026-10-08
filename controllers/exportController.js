@@ -1,8 +1,10 @@
 const asyncHandler = require('express-async-handler');
 const RegulatoryRequirement = require('../models/RegulatoryRequirement');
 const ExportOperation = require('../models/ExportOperation');
+const ExportLead = require('../models/ExportLead');
 const regions = require('../data/regions');
 const countries = require('../data/countries');
+const logisticsEstimates = require('../data/logisticsEstimates');
 
 // @desc    List Uzbekistan regions (static reference data)
 // @route   GET /api/regions
@@ -103,6 +105,66 @@ const advanceExportOperation = asyncHandler(async (req, res) => {
     res.json(updated);
 });
 
+// @desc    Create an export lead (request help finding a buyer / support)
+// @route   POST /api/export-leads
+// @access  Private
+const createExportLead = asyncHandler(async (req, res) => {
+    const { product, countryCode, message, contactPhone } = req.body;
+
+    const lead = await ExportLead.create({
+        user: req.user._id,
+        product,
+        countryCode,
+        message,
+        contactPhone,
+    });
+
+    res.status(201).json(lead);
+});
+
+// @desc    List the logged-in user's own export leads
+// @route   GET /api/export-leads/mine
+// @access  Private
+const getMyExportLeads = asyncHandler(async (req, res) => {
+    const leads = await ExportLead.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json(leads);
+});
+
+// @desc    List all export leads (for the team to follow up on)
+// @route   GET /api/export-leads
+// @access  Private/Admin
+const getExportLeads = asyncHandler(async (req, res) => {
+    const leads = await ExportLead.find({})
+        .populate('user', 'name email')
+        .populate('product', 'name')
+        .sort({ createdAt: -1 });
+    res.json(leads);
+});
+
+// @desc    Rough, clearly-estimated logistics cost for one destination
+// @route   GET /api/logistics/estimate
+// @access  Public
+const getLogisticsEstimate = asyncHandler(async (req, res) => {
+    const { country, weightTons } = req.query;
+    const estimate = logisticsEstimates[(country || '').toUpperCase()];
+
+    if (!estimate || !weightTons) {
+        res.status(400);
+        throw new Error('country and weightTons are required, and country must be a known destination');
+    }
+
+    const tons = Number(weightTons);
+    res.json({
+        countryCode: country.toUpperCase(),
+        mode: estimate.mode,
+        pricePerTonUsd: estimate.pricePerTonUsd,
+        estimatedTotalUsd: Math.round(estimate.pricePerTonUsd * tons),
+        transitDays: estimate.transitDays,
+        provenance: 'estimate',
+        note: "Bu taxminiy baho. Haqiqiy narx tashuvchi kompaniyaga bog'liq holda farq qilishi mumkin.",
+    });
+});
+
 module.exports = {
     getRegions,
     getCountries,
@@ -111,4 +173,8 @@ module.exports = {
     getMyExportOperations,
     startExportOperation,
     advanceExportOperation,
+    createExportLead,
+    getMyExportLeads,
+    getExportLeads,
+    getLogisticsEstimate,
 };

@@ -29,10 +29,12 @@ function checkFileType(file, cb) {
     'image/webp',
     'image/heic',
     'image/heif',
+    // Certificates are commonly scanned/exported as PDF.
+    'application/pdf',
   ].includes(file.mimetype);
 
   if (ok) return cb(null, true);
-  cb(new Error(`Images only! mimetype=${file.mimetype}`));
+  cb(new Error(`Images or PDF only! mimetype=${file.mimetype}`));
 }
 
 
